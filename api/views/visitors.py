@@ -23,3 +23,10 @@ def create():
 def index():
   visitors = Visitor.query.all()
   return jsonify([visitor.serialize() for visitor in visitors]), 200
+
+
+@visitors.route('/<id>', methods=["GET"])
+def show(id):
+  visitor = Visitor.query.filter_by(id=id).first()
+  visitor_data = visitor.serialize()
+  return jsonify(visitor=visitor_data), 200
