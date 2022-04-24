@@ -5,7 +5,7 @@ class Visitor(db.Model):
     __tablename__ = 'visitors'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100))
-    bday = db.Column(db.String(100))
+    bday = db.Column(db.DateTime)
     d_zodiac = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
