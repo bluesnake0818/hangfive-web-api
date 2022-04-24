@@ -30,3 +30,19 @@ def show(id):
   visitor = Visitor.query.filter_by(id=id).first()
   visitor_data = visitor.serialize()
   return jsonify(visitor=visitor_data), 200
+
+@visitors.route('/<id>', methods=["PUT"]) 
+# @login_required
+def update(id):
+  data = request.get_json()
+  # profile = read_token(request)
+  visitor = Visitor.query.filter_by(id=id).first()
+
+  # if visitor.profile_id != profile["id"]:
+  #   return 'Forbidden', 403
+
+  for key in data:
+    setattr(visitor, key, data[key])
+
+  db.session.commit()
+  return jsonify(visitor.serialize()), 200
