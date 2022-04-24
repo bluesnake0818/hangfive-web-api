@@ -17,3 +17,9 @@ def create():
   db.session.add(visitor)
   db.session.commit()
   return jsonify(visitor.serialize()), 201
+
+
+@visitors.route('/', methods=["GET"])
+def index():
+  visitors = Visitor.query.all()
+  return jsonify([visitor.serialize() for visitor in visitors]), 200
