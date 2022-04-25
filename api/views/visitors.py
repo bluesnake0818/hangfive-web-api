@@ -15,9 +15,7 @@ def create():
   data = request.get_json()
   # profile = read_token(request)
   # data["profile_id"] = profile["id"]
-  # for key, value in data:
-  #   print(value)
-  print(main(data["bday"]))
+  data["d_zodiac"] = main(data["bday"])
   visitor = Visitor(**data)
   db.session.add(visitor)
   db.session.commit()
