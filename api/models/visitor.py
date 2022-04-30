@@ -1,9 +1,6 @@
 from datetime import datetime
 from api.models.db import db
 
-
-
-
 class Visitor(db.Model):
     __tablename__ = 'visitors'
     id = db.Column(db.Integer, primary_key=True)
