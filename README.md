@@ -1,2 +1,5 @@
 - db: hangfive_web_api
 - virtual environment: hangfive-web-api
+- heroku debug: heroku logs --tail 
+- heroku db: heroku pg:psql
+- Drop databse hangfive_web_api
