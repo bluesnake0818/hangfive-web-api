@@ -17,13 +17,9 @@ def create():
   # profile = read_token(request)
   # data["profile_id"] = profile["id"]
 
-  # TODO: 프론트에서 넘어온 data['bday'] 를 19870625 로 변환 필요
-  date = data["bday"]
-  # ex)
-  date = "19870625"
+  date = data['bday'].replace('-','')
   header = {'x-api-key': API_KEY}
   response = requests.get(f'{API_URL}hangfive-web/birthchart', params={'date': date}, headers=header)
-
   data["d_zodiac"] = response.json()
   visitor = Visitor(**data)
   db.session.add(visitor)
