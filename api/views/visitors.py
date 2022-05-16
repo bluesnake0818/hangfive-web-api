@@ -1,10 +1,11 @@
+import requests
 from flask import Blueprint, jsonify, request
 from api.middleware import login_required, read_token
 from api.middleware.calc_bchart_script import main
 
 from api.models.db import db
 from api.models.visitor import Visitor
-
+from config import API_URL, API_KEY
 
 visitors = Blueprint('visitors', 'visitors')
 
@@ -15,7 +16,15 @@ def create():
   data = request.get_json()
   # profile = read_token(request)
   # data["profile_id"] = profile["id"]
-  data["d_zodiac"] = main(data["bday"])
+
+  # TODO: 프론트에서 넘어온 data['bday'] 를 19870625 로 변환 필요
+  date = data["bday"]
+  # ex)
+  date = "19870625"
+  header = {'x-api-key': API_KEY}
+  response = requests.get(f'{API_URL}hangfive-web/birthchart', params={'date': date}, headers=header)
+
+  data["d_zodiac"] = response.json()
   visitor = Visitor(**data)
   db.session.add(visitor)
   db.session.commit()
