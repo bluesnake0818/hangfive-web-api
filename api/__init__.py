@@ -12,6 +12,7 @@ from api.models.visitor import Visitor
 # ============ Import Views ============
 from api.views.auth import auth
 from api.views.visitors import visitors
+from api.views.keybert import keybert
 
 cors = CORS()
 migrate = Migrate() 
@@ -28,6 +29,7 @@ def create_app(config):
   # ============ Register Blueprints ============
   app.register_blueprint(auth, url_prefix='/api/auth') 
   app.register_blueprint(visitors, url_prefix='/api/visitors')
+  app.register_blueprint(keybert, url_prefix='/api/keybert')
 
   return app
 

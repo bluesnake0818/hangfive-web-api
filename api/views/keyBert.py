@@ -1,21 +1,22 @@
 import requests
 from flask import Blueprint, jsonify, request
 from api.middleware import login_required, read_token
+from api.middleware.calc_bchart_script import main
+
+from api.models.db import db
+from api.models.visitor import Visitor
 from config import API_URL, API_KEY
+
 from keybert import KeyBERT
 
-doc = """TikTok        LocationsOrder DirectMake a ReservationOur Burgers@5napkinburger May 3 2023 805 am  The vibes 😎😎😎@ramiromiranda9May 2 2023 130 pm  That new new 😎 Introducing THE BAJA BURGER 🌊 Griddle Smashed 7oz Burger Beef Chili Cheddar Smash Pickled Jalapenos Red Onions and BBQ Ranch Available this month only fam so don’t 💤 on it Tap that link in bio to get yours 🍔May 1 2023 211 pm  This stack 😵😵😵@virgileantonycoachsportifApril 29 2023 217 pm  LAST CALL 👀 Spicy Cumin Lamb Burger 🌶 7oz Lamb Burger with Spicy Cumin Spices Shredded Iceberg Lettuce Pickled Red Onions Horseradish Pickles and Citrus Vinaigrette on a Sesame Bun 🍔 Order direct while you still can 💯April 29 2023 1005 am  Reminder We're more than just burgers We're 1010 salads too 😎@nychealthyfindsApril 27 2023 136 pm  If you haven’t had our Veggie Burger yet…wyd?? 🥦🥕🥬🍆🥒foodbeast burgersofinstagram burgerporn foodie foodporn foodies foodiesofinstagram foodcoma foodilysm foodpornshare eatupnewyork cheatday cheatdayeats devour infatuation forkyeah dailyfoodfeed alwayshungry delicious instafood behindthescenes nyc veggieburgerApril 27 2023 1014 am  thirstythursday fix 🙌 Kick it with us for Happy Hour today from 36pm 😎April 26 2023 920 am  What's your goto wing 🧐 Today we're going with Buffalo 🔥April 25 2023 917 am  Al fresco dining season is finallyyyyy upon us ☀️ Who's stoked? Reserve your table with us at the link in bio 💯April 20 2023 239 pm  DYNAMIC DUO 👉 🐓 + 🧇  ❤️ foodies foodporn chicken chickenandwaffles lunch dinner infatuation delicious alwayshungry nyc nyceats eeeeeats grub cheatdayeats behindthescenes inthekitchen howitsmadeApril 17 2023 920 am  Tuna Poke Nachos 🍣 Soy Marinated Tuna Avocado Wasabi Cream Served on House Made Russet Potato Chips 🤤April 15 2023 922 am  You can NEVER go wrong with adding bacon☝️🥓 Comment below your fav burger to add bacon to 👀@chicharronasaurusApril 14 2023 750 pm  Friendly Friday reminder that we have ALL DAY BRUNCH  now serve ESPRESSO MARTINIS 😎 You know what to do 👊brunch brunchnyc espressomartini espressomartinis espressomartininyc cocktails cocktailporn nycbars nyccocktails boozy fridaynight bartender eeeeeats infatuationnyc manhattanApril 14 2023 921 am  Steak Frites kinda FRYDAY 🍟 Cooked to absolute perfection 🤤 Swing by if you haven't tried this one yet @revciancioApril 13 2023 920 am  TRIPLE THREAT 🔥 Order direct @ link in bio fam 🐔April 12 2023 925 am  It's hot but we have frozen watermelon margs for that 🙏April 10 2023 242 pm  NEW IN TOWN 👉 Spicy Lamb Burger  7oz Lamb Burger with Spicy Cumin Spices Shredded Iceberg Lettuce Pickled Red Onions Horseradish Pickles and Citrus Vinaigrette on a Sesame Bun 😮‍💨foodbeast burgersofinstagram burgerporn foodie foodporn foodies foodiesofinstagram foodcoma foodilysm foodpornshare eatupnewyork cheatday cheatdayeats devour infatuation forkyeah dailyfoodfeed alwayshungry delicious instafood behindthescenes nycApril 9 2023 1019 am  Cake is always a great idea ☝️ Especially when its our SIX LAYER CARROT CAKE w cream cheese icing pecans  coconut 🥕🥥🍰@sambameatstheworldApril 8 2023 1008 am  Cheers to the weekend fam Let's make it count 💚@weirdwildwonderfuldrinksApril 6 2023 920 am  Burgers how you want them where you want them when you want them 🍔 head to the link in bio 😎@thisplatenycApril 5 2023 215 pm  Drooling over this GRILLED CHICKEN SAMMY 🤤🐔🍔@revciancioApril 4 2023 258 pm  In case you needed a reminder that the Patty Melt exists 👀foodbeast burgersofinstagram burgerporn foodie foodporn foodies foodiesofinstagram foodcoma foodilysm foodpornshare eatupnewyork cheatday cheatdayeats devour infatuation forkyeah dailyfoodfeed alwayshungry delicious instafood behindthescenes nycApril 2 2023 110 pm  SUNDAY FUNDAY TRIPLE THREAT 🔥March 31 2023 327 pm  It’s BURGER time 😎 The 5 Napkin Burger 👉 10 oz All Natural Beef Imported Gruyere Cheese Caramelized Onions  RosemaryGarlic Aioli 🔥foodbeast burgersofinstagram burgerporn foodie foodporn foodies foodiesofinstagram foodcoma foodilysm foodpornshare eatupnewyork cheatday cheatdayeats devour infatuation forkyeah dailyfoodfeed alwayshungry delicious instafood behindthescenes nycMarch 29 2023 326 pm  The best BaconCheddar burger in the city Take our word for it 😎🥓🧀foodbeast burgersofinstagram burgerporn foodie foodporn foodies foodiesofinstagram foodcoma foodilysm foodpornshare eatupnewyork cheatday cheatdayeats devour infatuation forkyeah dailyfoodfeed alwayshungry delicious instafoodHELL’S KITCHENUPPER WEST SIDE                        Join Our Mailing List                                                Accessibility                                                Careers                                                Privacy Policy                        FacebookInstagramTikTokOrphmediaOrder with ResyOrder with OpentableOrder with OpentableOrder with OpentableHells KitchenUpper WestsideUpper EastsideUnion Square"""
+keybert = Blueprint('keybert', 'keybert')
 
-kw_model = KeyBERT()
+@keybert.route('/', methods=["POST"])
+def createKeywords():
+  doc = request.get_json()
+  kw_model = KeyBERT()
+  keywords = kw_model.extract_keywords(doc)
 
-keywords = kw_model.extract_keywords(doc, keyphrase_ngram_range=(1, 2), stop_words=None, highlight=True)
-[
-('learning', 0.4604),
-('algorithm', 0.4556),
-('training', 0.4487),
-('class', 0.4086),
-('mapping', 0.3700)
-]
-
-
-print(keywords)
+  print(keywords)
+  return jsonify(keywords), 201
+  # return doc
