@@ -7,24 +7,26 @@ from api.models.db import db
 from api.models.visitor import Visitor
 from config import API_URL, API_KEY
 
+from keybert import KeyBERT
+
 visitors = Blueprint('visitors', 'visitors')
 
 
-@visitors.route('/', methods=["POST"])
-# @login_required
-def create():
-  data = request.get_json()
-  # profile = read_token(request)
-  # data["profile_id"] = profile["id"]
+# @visitors.route('/', methods=["POST"])
+# # @login_required
+# def create():
+#   data = request.get_json()
+#   # profile = read_token(request)
+#   # data["profile_id"] = profile["id"]
 
-  date = data['bday'].replace('-','')
-  header = {'x-api-key': API_KEY}
-  response = requests.get(f'{API_URL}hangfive-web/birthchart', params={'date': date}, headers=header)
-  data["d_zodiac"] = response.json()
-  visitor = Visitor(**data)
-  db.session.add(visitor)
-  db.session.commit()
-  return jsonify(visitor.serialize()), 201
+#   date = data['bday'].replace('-','')
+#   header = {'x-api-key': API_KEY}
+#   response = requests.get(f'{API_URL}hangfive-web/birthchart', params={'date': date}, headers=header)
+#   data["d_zodiac"] = response.json()
+#   visitor = Visitor(**data)
+#   db.session.add(visitor)
+#   db.session.commit()
+#   return jsonify(visitor.serialize()), 201
 
 
 @visitors.route('/', methods=["GET"])
@@ -67,3 +69,14 @@ def delete(id):
   db.session.delete(visitor)
   db.session.commit()
   return jsonify(message="Success"), 200
+
+# ----------------- TEST -----------------------------
+@visitors.route('/', methods=["POST"])
+def createKeywords():
+  doc = request.get_json()
+  kw_model = KeyBERT()
+  keywords = kw_model.extract_keywords(doc)
+
+  print(keywords)
+  return jsonify(keywords), 201
+  # return doc
